@@ -18,7 +18,7 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));  // ✅ Handle preflight CORS requests
 app.use(express.json()); // ✅ Ensure JSON parsing is enabled
 
-
+let fetch;
 
 app.get("/", async (req, res) => {
   res.status(200).json("Hello world of time boys !");
@@ -28,9 +28,7 @@ app.get("/", async (req, res) => {
  
 
 app.post("/sendfileconfig",   async (req, res) => {
- 
-        return res.status(200).json("GOOD JOB kiosso !!");
-    
+  return res.status(200).json("GOOD JOB kiosso !!"); 
 });
 
 
