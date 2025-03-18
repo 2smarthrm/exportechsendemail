@@ -8,16 +8,14 @@ const path = require("path");
 const app = express();
 
 const corsOptions = {
-  origin: "https://store.exportech.com.pt", // Allow only your frontend
-  methods: "GET,POST,OPTIONS",
+  origin: "https://store.exportech.com.pt", // ✅ Only allow requests from your frontend
+  methods: "GET, POST, OPTIONS",  // ✅ Ensure POST requests are allowed
   allowedHeaders: "Content-Type, Authorization",
-  credentials: true, // Important if you're using cookies or authentication headers
+  credentials: true
 };
 
-
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight requests
-
+app.options("*", cors(corsOptions));  // ✅ Handle preflight CORS requests
  
 let fetch;
 
