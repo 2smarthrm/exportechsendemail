@@ -19,7 +19,7 @@ app.options("*", cors(corsOptions));  // ✅ Handle preflight CORS requests
  
 let fetch;
 
- 
+app.use(express.json());  
 app.get("/", async (req, res) => {
   res.status(200).json("Hello world of time boys !");
 });
@@ -28,40 +28,9 @@ app.get("/", async (req, res) => {
  
 
 app.post("/sendfileconfig",   async (req, res) => {
-  try { 
-    // Nodemailer configuration
-    let transporter = nodemailer.createTransport({
-      service: "Gmail",
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "2smarthrm@gmail.com",
-        pass: "bguvbniphmcnxdrl",  
-      },
-    });
-
-    const mailOptions = {
-      from: "geral@exportech.com.pt",
-      to: req.body.email,  
-      bcc: ["kiossocamuegi@gmail.com"],  
-      subject: `Configuração Exportech - ${req.body.email}`,
-      text: "Segue em anexo a configuração do cliente.",
+ 
+        return res.status(200).json("GOOD JOB !!");
     
-    };
-
-    transporter.sendMail(mailOptions, (err, info) => {
-      if (err) {
-        console.error("Erro ao enviar e-mail:", err);
-        return res.status(500).json({ error: "Erro ao enviar o e-mail." });
-      }
-      console.log("E-mail enviado: "+req.body.email , info.response);
-      return res.status(200).json("Configuração enviada com sucesso!");
-    });
-  } catch (error) {
-    console.error("Erro:", error);
-    res.status(500).json("Erro ao processar a solicitação.");
-  }
 });
 
 
