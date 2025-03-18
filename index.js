@@ -4,12 +4,13 @@ const nodemailer = require("nodemailer");
 
 const app = express();
 
-// ✅ Configuração do CORS para permitir o frontend acessar o backend
 app.use(cors({
     origin: "https://store.exportech.com.pt",
     methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"]
+    allowedHeaders: ["Content-Type", "Email", "Filename"], // ✅ Adicionamos "Filename"
+    credentials: true
 }));
+
 
 // ✅ Middleware para aceitar arquivos binários no body
 app.use(express.raw({ type: "application/pdf", limit: "50mb" }));
