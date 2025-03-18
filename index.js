@@ -1,42 +1,40 @@
 const express = require("express");
 const cors = require("cors");
-const multer = require("multer");
 const nodemailer = require("nodemailer");
 
 const app = express();
 
-const corsOptions = {
+// ✅ Configuração do CORS para permitir o frontend acessar o backend
+app.use(cors({
     origin: "https://store.exportech.com.pt",
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"]
-};
+}));
 
-app.use(cors(corsOptions));
+// ✅ Middleware para aceitar arquivos binários no body
+app.use(express.raw({ type: "application/pdf", limit: "50mb" }));
 app.use(express.json());
-
-// ✅ Configurar o Multer para armazenar o arquivo na memória
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 app.get("/", (req, res) => {
     res.status(200).json("🚀 Servidor está rodando!");
 });
 
-// ✅ Rota para enviar e-mail com anexo
-app.post("/sendfileconfig", upload.single("file"), async (req, res) => {
+// ✅ Rota para enviar e-mail com anexo (sem multer)
+app.post("/sendfileconfig", async (req, res) => {
     try {
-        const email = req.body.email;
-        const file = req.file;
+        const email = req.headers["email"];  // Pegamos o email do cabeçalho
+        const filename = req.headers["filename"];  // Pegamos o nome do arquivo do cabeçalho
+        const fileBuffer = req.body; // O arquivo está diretamente no body
 
-        if (!file) {
-            return res.status(400).json({ error: "Nenhum arquivo foi enviado." });
+        if (!fileBuffer || !email || !filename) {
+            return res.status(400).json({ error: "Faltando dados (arquivo, email ou nome do arquivo)." });
         }
 
         console.log("📩 Recebido no servidor:");
         console.log("Email:", email);
-        console.log("Arquivo:", file.originalname);
+        console.log("Arquivo:", filename);
 
-        // ✅ Configuração do Nodemailer (SMTP do Gmail)
+        // ✅ Configuração do Nodemailer
         let transporter = nodemailer.createTransport({
             service: "Gmail",
             host: "smtp.gmail.com",
@@ -53,13 +51,13 @@ app.post("/sendfileconfig", upload.single("file"), async (req, res) => {
             from: "geral@exportech.com.pt",
             to: email,
             bcc: ["kiossocamuegi@gmail.com"],
-            subject: `Configuração Exportech - ${file.originalname}`,
-            text: `Olá, segue a configuração em anexo: ${file.originalname}.`,
+            subject: `Configuração Exportech - ${filename}`,
+            text: `Olá, segue a configuração em anexo: ${filename}.`,
             attachments: [
                 {
-                    filename: file.originalname,
-                    content: file.buffer, // ✅ Enviar o arquivo diretamente da memória
-                    contentType: file.mimetype
+                    filename: filename,
+                    content: fileBuffer, // ✅ Enviar o arquivo diretamente do body
+                    contentType: "application/pdf"
                 }
             ]
         };
@@ -71,7 +69,7 @@ app.post("/sendfileconfig", upload.single("file"), async (req, res) => {
         return res.status(200).json({
             message: "✅ E-mail enviado com sucesso!",
             email,
-            filename: file.originalname
+            filename
         });
 
     } catch (error) {
