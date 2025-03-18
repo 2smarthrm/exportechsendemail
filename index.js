@@ -1,53 +1,47 @@
-const express = require("express");
+  const express = require("express");
 const cors = require("cors");
+const multer = require("multer");
 const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
-
-app.use(cors({
-    origin: "https://store.exportech.com.pt",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Email", "Filename"], // ✅ Adicionamos "Filename"
-    credentials: true
-}));
-
-
-// ✅ Middleware para aceitar arquivos binários no body
-app.use(express.raw({ type: "application/pdf", limit: "50mb" }));
+app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.status(200).json("🚀 Servidor está rodando!");
+// 📂 Configuração do Multer para armazenar arquivos na pasta "uploads"
+const storage = multer.diskStorage({
+    destination: "./uploads",
+    filename: (req, file, cb) => {
+        const filename = `${Date.now()}-${file.originalname}`;
+        cb(null, filename);
+    }
 });
+const upload = multer({ storage });
 
-// ✅ Rota para enviar e-mail com anexo (sem multer)
-app.post("/sendfileconfig", async (req, res) => {
+// 🚀 Rota de upload e envio de e-mail com anexo
+app.post("/sendfileconfig", upload.single("file"), async (req, res) => {
     try {
-        const email = req.headers["email"];  // Pegamos o email do cabeçalho
-        const filename = req.headers["filename"];  // Pegamos o nome do arquivo do cabeçalho
-        const fileBuffer = req.body; // O arquivo está diretamente no body
+        if (!req.file) return res.status(400).json({ error: "Nenhum arquivo enviado!" });
 
-        if (!fileBuffer || !email || !filename) {
-            return res.status(400).json({ error: "Faltando dados (arquivo, email ou nome do arquivo)." });
-        }
+        const email = req.body.email;
+        const filename = req.file.filename;  // 📄 Nome do arquivo salvo
+        const filePath = path.join(__dirname, "uploads", filename);  // 📂 Caminho do arquivo
 
         console.log("📩 Recebido no servidor:");
         console.log("Email:", email);
         console.log("Arquivo:", filename);
 
-        // ✅ Configuração do Nodemailer
+        // ✅ Configuração do Nodemailer (SMTP do Gmail)
         let transporter = nodemailer.createTransport({
             service: "Gmail",
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
             auth: {
                 user: "2smarthrm@gmail.com",
-                pass: "bguvbniphmcnxdrl",
+                pass: "bguvbniphmcnxdrl",  
             },
         });
 
-        // ✅ Opções do e-mail
+        // ✅ Opções do e-mail (incluindo o anexo)
         const mailOptions = {
             from: "geral@exportech.com.pt",
             to: email,
@@ -57,8 +51,7 @@ app.post("/sendfileconfig", async (req, res) => {
             attachments: [
                 {
                     filename: filename,
-                    content: fileBuffer, // ✅ Enviar o arquivo diretamente do body
-                    contentType: "application/pdf"
+                    path: filePath  // 🗂️ Anexa o arquivo salvo
                 }
             ]
         };
@@ -67,8 +60,12 @@ app.post("/sendfileconfig", async (req, res) => {
         let info = await transporter.sendMail(mailOptions);
         console.log("📨 E-mail enviado com sucesso para:", email);
 
+        // 🗑️ Remover o arquivo após envio
+        fs.unlinkSync(filePath);
+        console.log("🗑️ Arquivo removido:", filename);
+
         return res.status(200).json({
-            message: "✅ E-mail enviado com sucesso!",
+            message: "✅ E-mail enviado com sucesso com anexo!",
             email,
             filename
         });
@@ -79,8 +76,8 @@ app.post("/sendfileconfig", async (req, res) => {
     }
 });
 
-// ✅ Iniciar Servidor
+// 📂 Servir arquivos da pasta "uploads"
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Servidor rodando em http://localhost:${PORT}`));
