@@ -1,4 +1,4 @@
- {
+{
   "version": 2,
   "builds": [
     {
@@ -11,5 +11,12 @@
       "src": "/(.*)",
       "dest": "index.js"
     }
-  ]
+  ],
+  "functions": {
+    "index": {
+      "maxDuration": 10,
+      "memory": 512,
+      "maxRequestBodySize": "50mb"
+    }
+  }
 }
