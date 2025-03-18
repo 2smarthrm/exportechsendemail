@@ -1,0 +1,9 @@
+###
+
+POST http://localhost:5000/sendemailaddressmessagetocompany
+content-type: application/json
+
+{
+    "name": " we love your app",
+    "time": "some random message"
+}
