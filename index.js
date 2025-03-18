@@ -16,20 +16,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));  // ✅ Handle preflight CORS requests
- 
- 
-app.use(express.json()); 
-
-let fetch;  
-const storage = multer.memoryStorage();
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
-});
-
-
-
+app.use(express.json()); // ✅ Ensure JSON parsing is enabled
 
 
 
