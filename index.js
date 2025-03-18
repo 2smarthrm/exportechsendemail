@@ -18,8 +18,7 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));  // ✅ Handle preflight CORS requests
  
  
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json()); 
 
 let fetch;  
 const storage = multer.memoryStorage();
