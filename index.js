@@ -17,9 +17,23 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));  // ✅ Handle preflight CORS requests
  
-let fetch;
+ 
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-app.use(express.json());  
+let fetch;  
+const storage = multer.memoryStorage();
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+});
+
+
+
+
+
+
 app.get("/", async (req, res) => {
   res.status(200).json("Hello world of time boys !");
 });
@@ -29,7 +43,7 @@ app.get("/", async (req, res) => {
 
 app.post("/sendfileconfig",   async (req, res) => {
  
-        return res.status(200).json("GOOD JOB !!");
+        return res.status(200).json("GOOD JOB kiosso !!");
     
 });
 
