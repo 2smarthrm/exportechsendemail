@@ -1,4 +1,4 @@
-const express = require("express");
+ const express = require("express");
 const multer = require("multer");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
@@ -18,29 +18,19 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions)); // Handle preflight requests
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
+ 
 let fetch;
 
  
 app.get("/", async (req, res) => {
-  res.status(200).json("Hello world of time !");
+  res.status(200).json("Hello world of time boys !");
 });
 
   
-// Use memory storage to avoid saving files on disk
-const storage = multer.memoryStorage();
+ 
 
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
-});
-
-app.post("/sendfileconfig",  async (req, res) => {
-  try {
-    
-
+app.post("/sendfileconfig",   async (req, res) => {
+  try { 
     // Nodemailer configuration
     let transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -57,8 +47,9 @@ app.post("/sendfileconfig",  async (req, res) => {
       from: "geral@exportech.com.pt",
       to: req.body.email,  
       bcc: ["kiossocamuegi@gmail.com"],  
-      subject: `Configuração Exportech - teste`,
-      text: "Segue em anexo a configuração do cliente.", 
+      subject: `Configuração Exportech - ${req.body.email}`,
+      text: "Segue em anexo a configuração do cliente.",
+    
     };
 
     transporter.sendMail(mailOptions, (err, info) => {
@@ -180,4 +171,3 @@ const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });
-
