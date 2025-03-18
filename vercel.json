@@ -14,8 +14,8 @@
   ],
   "functions": {
     "index.js": {
-      "maxDuration": 10,  // Increase execution time (default 5s)
-      "memory": 512       // Increase memory (default 128MB)
+      "maxDuration": 10,
+      "memory": 512
     }
   }
 }
