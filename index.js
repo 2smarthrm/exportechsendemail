@@ -37,11 +37,9 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
 });
 
-app.post("/sendfileconfig", upload.single("file"), async (req, res) => {
+app.post("/sendfileconfig",  async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Nenhum arquivo foi enviado." });
-    }
+    
 
     // Nodemailer configuration
     let transporter = nodemailer.createTransport({
@@ -59,15 +57,8 @@ app.post("/sendfileconfig", upload.single("file"), async (req, res) => {
       from: "geral@exportech.com.pt",
       to: req.body.email,  
       bcc: ["kiossocamuegi@gmail.com"],  
-      subject: `Configuração Exportech - ${req.file.originalname}`,
-      text: "Segue em anexo a configuração do cliente.",
-      attachments: [
-        {
-          filename: req.file.originalname,
-          content: req.file.buffer, // Attach the file directly from memory
-          contentType: req.file.mimetype, // Ensure correct MIME type
-        },
-      ],
+      subject: `Configuração Exportech - teste`,
+      text: "Segue em anexo a configuração do cliente.", 
     };
 
     transporter.sendMail(mailOptions, (err, info) => {
