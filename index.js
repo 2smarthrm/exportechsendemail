@@ -2,70 +2,91 @@ const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 
+
+function Managers(managerKey){
+  const newKey = managerKey.toLowerCase().trim().split(" ").join("");
+  const ManagersArray = [
+    {name:"brunopimenta", email:"bruno.pimenta@exportech.com.pt"},
+    {name:"josécarvalho", email:"jose.carvalho@exportech.com.pt"},
+    {name:"germanooliveira", email:"germano.oliveira@exportech.com.pt"},
+    {name:"ruiguedelha", email:"rui.guedelha@exportech.com.pt"},
+    {name:"pauloferreira", email:"paulo.ferreira@exportech.com.pt"},
+    {name:"fábiocatela", email:"fabio.catela@exportech.com.pt"}
+  ];
+
+  var mail = null;
+
+  for (var i = 0; i < ManagersArray.length; i++) { 
+         if (newKey ===  ManagersArray[i].name){
+          mail =  ManagersArray[i].email;
+          console.log("EMAIL = ",   ManagersArray[i].email);
+          return  ManagersArray[i].email;
+       }
+  }
+
+  console.log("key = ", newKey)
+  return mail !== null ? "fabio.catela@exportech.com.pt" : mail;  
+} 
+
+
 const app = express();
-
-const corsOptions = {
-    origin: "https://store.exportech.com.pt",  // ✅ Permite requisições do frontend
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"]
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ✅ Teste para ver se o servidor está online
-app.get("/", (req, res) => {
-    res.status(200).json("🚀 Servidor está rodando!");
-});
+// ✅ Email Sender Function
+async function sendEmail(email, subject,  htmlContent, manager) {
+    let transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+            user: "2smarthrm@gmail.com",
+            pass: "bguvbniphmcnxdrl",
+        },
+    });
 
-// ✅ Rota que recebe os dados e envia e-mail
+    const CurrentManager = Managers(manager); 
+    console.log("MANAGER = ", Managers(manager));
+
+    let mailOptions = {
+        from: "geral@exportech.com.pt",
+        to: email,
+        bcc: [CurrentManager],
+        subject: subject,
+        html: htmlContent,
+    };
+
+    return transporter.sendMail(mailOptions);
+}
+
+// ✅ API Route: Handle Email Sending
 app.post("/sendfileconfig", async (req, res) => {
     try {
-        const { email, filename } = req.body;  // ✅ Pega os dados do frontend
+        const { email, htmlContent , manager} = req.body;
 
-        console.log("📩 Recebido no servidor:");
-        console.log("Email:", email);
-        console.log("Arquivo:", filename);
+        if (!email || !htmlContent) {
+            return res.status(400).json({ error: "Missing email or HTML content!" });
+        }
 
-        // ✅ Configuração do Nodemailer (SMTP do Gmail)
-        let transporter = nodemailer.createTransport({
-            service: "Gmail",
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: "2smarthrm@gmail.com",
-                pass: "bguvbniphmcnxdrl",  
-            },
-        });
+        console.log("📩 Sending email to:", email);
 
-        // ✅ Opções do e-mail
-        const mailOptions = {
-            from: "geral@exportech.com.pt",
-            to: email,
-            bcc: ["kiossocamuegi@gmail.com"],  
-            subject: `Configuração Exportech - ${filename}`,
-            text: `Olá, segue a configuração em anexo: ${filename}.`,
-        };
+        // ✅ Send Email
+        const emailSubject = `Configuração Exportech - Detalhes do Projeto`;
+        await sendEmail(email, emailSubject, htmlContent, manager);
 
-        // ✅ Enviar o e-mail
-        let info = await transporter.sendMail(mailOptions);
-        console.log("📨 E-mail enviado com sucesso para:", email);
+        console.log("📨 Email sent successfully to:", email);
 
         return res.status(200).json({
-            message: "✅ E-mail enviado com sucesso!",
-            email,
-            filename
+            message: "✅ Email sent successfully!",
         });
 
     } catch (error) {
-        console.error("❌ Erro ao enviar e-mail:", error);
-        return res.status(500).json({ error: "Erro ao enviar o e-mail." });
+        console.error("❌ Error:", error);
+        return res.status(500).json({ error: "Error sending email!" });
     }
 });
 
-// ✅ Iniciar Servidor
+// ✅ Start Server
 const PORT = 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
