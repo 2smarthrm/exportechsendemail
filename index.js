@@ -58,6 +58,13 @@ async function sendEmail(email, subject,  htmlContent, manager) {
     return transporter.sendMail(mailOptions);
 }
 
+// ✅ Teste para ver se o servidor está online
+app.get("/", (req, res) => {
+    res.status(200).json("🚀 Servidor está rodando!");
+});
+
+
+
 // ✅ API Route: Handle Email Sending
 app.post("/sendfileconfig", async (req, res) => {
     try {
