@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer");
 function Managers(managerKey){
   const newKey = managerKey.toLowerCase().trim().split(" ").join("");
   const ManagersArray = [
-    {name:"brunopimenta", email:"bpruno.pimenta@exportech.com.pt"},
+    {name:"brunopimenta", email:"bruno.pimenta@exportech.com.pt"},
     {name:"josécarvalho", email:"jose.carvalho@exportech.com.pt"},
     {name:"germanooliveira", email:"germano.oliveira@exportech.com.pt"},
     {name:"ruiguedelha", email:"rui.guedelha@exportech.com.pt"},
