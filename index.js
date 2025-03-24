@@ -1,14 +1,9 @@
- 
-
-  
-
- const express = require("express");
- const cors = require("cors");
- const nodemailer = require("nodemailer");
+const express = require("express");
+const cors = require("cors");
+const nodemailer = require("nodemailer");
 const multer = require("multer");  
 const fs = require("fs");
 const path = require("path");
- 
  
  function Managers(managerKey){
    const newKey = managerKey.toLowerCase().trim().split(" ").join("");
