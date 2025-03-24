@@ -70,19 +70,18 @@
      const pdfBytes = await generatePDF(Data, ProductsContent);
  
      let transporter = nodemailer.createTransport({
-       service: "Gmail",
-       host: "smtp.gmail.com",
-       port: 465,
-       secure: true,
-       auth: {
-         user: "2smarthrm@gmail.com",
-         pass: "bguvbniphmcnxdrl",
-       },
+        host: "smtp.hostinger.com", // ✅ CORRETO
+        port: 465, // Porta SMTP segura para SSL
+        secure: true, // true para SSL, false para STARTTLS
+        auth: {
+            user: "noreply@marketing.exportech.com.pt", // Seu e-mail da Hostinger
+            pass: "!!_Exp@2024-?P4ulo#", // Sua senha ou senha de aplicativo
+        },
      });
  
      const mailOptions = {
-       from: "geral@exportech.com.pt",
-       to: ["geral@exportech.com.pt", Data.email],
+       from: "noreply@marketing.exportech.com.pt",
+       to: ["kiosso.silva@exportech.com.pt", Data.email],
        subject: `Formulário de Devolução - ${Data.company || "Não informado"}`,
        text: `Segue em anexo o formulário de devolução da empresa ${Data.company || "Não informado"}.`,
        attachments: [{ filename: "Formulario_Devolucao.pdf", content: pdfBytes, contentType: "application/pdf" }],
