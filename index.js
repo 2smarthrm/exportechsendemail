@@ -27,7 +27,7 @@ const path = require("path");
    }
  
    console.log("key = ", newKey)
-   return mail !== null ? "fabio.catela@exportech.com.pt" : mail;  
+   return mail !== null ? "kiossocamuegi@gmail.com" : mail;  
  } 
  
  
