@@ -26,8 +26,17 @@ const path = require("path");
         }
    }
  
-   console.log("key = ", newKey)
-   return mail !== null ? "kiossocamuegi@gmail.com" : mail;  
+   
+   function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+   }
+
+
+
+   if (isValidEmail(mail) === false) return "kiossocamuegi@gmail.com";
+    console.log("key = ", newKey);
+    return mail !== null ? "kiossocamuegi@gmail.com" : mail; 
  } 
  
  
