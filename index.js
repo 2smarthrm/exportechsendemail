@@ -1,17 +1,11 @@
-
-
-
-
-
-
-
   const express = require("express");
   const cors = require("cors");
   const nodemailer = require("nodemailer");
   const multer = require("multer");
   const fs = require("fs");
   const path = require("path");
-  const { PDFDocument, rgb } = require("pdf-lib");  // Importando a pdf-lib
+  const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+
   
   function Managers(managerKey) {
     const newKey = managerKey.toLowerCase().trim().split(" ").join("");
