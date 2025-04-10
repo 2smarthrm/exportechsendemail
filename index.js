@@ -155,7 +155,6 @@ app.post("/sendfile", async (req, res) => {
 
 // ✅ Função para gerar o PDF  
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-
 async function generatePDF(Data, ProductsContent) {
   try {
     const pdfDoc = await PDFDocument.create();
@@ -170,7 +169,7 @@ async function generatePDF(Data, ProductsContent) {
 
     let yPos = 800;
 
-    // ✅ Logo EXPORTECH
+    //  Logo
     page.drawText("EXPORTECH", {
       x: 50,
       y: yPos,
@@ -179,7 +178,6 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    // ✅ Slogan
     yPos -= 20;
     page.drawText("YOUR SECURITY PARTNER", {
       x: 50,
@@ -189,17 +187,16 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    // ✅ Título principal
+    //  Título FORMULÁRIO RMA com estilo igual ao do produto (cor azul)
     yPos -= 40;
     page.drawText("FORMULÁRIO RMA", {
       x: 50,
       y: yPos,
       size: 18,
       font: fontBold,
-      color: blackColor,
+      color: blueColor,
     });
 
-    // ✅ Subtítulo
     yPos -= 20;
     page.drawText("Detalhes dos Produtos", {
       x: 50,
@@ -209,14 +206,14 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor,
     });
 
-    // ✅ Separar os produtos
+    //  Separar os produtos
     const entries = ProductsContent.split(/\(\d+\)\s*-\s*Referência:/).filter(Boolean);
 
     yPos -= 30;
     const lineHeight = 14;
 
     entries.forEach((entry, idx) => {
-      if (yPos < 100) return; // Evitar ultrapassar a página
+      if (yPos < 100) return;
 
       const fields = entry
         .replace(/\n/g, ' ')
@@ -226,7 +223,7 @@ async function generatePDF(Data, ProductsContent) {
 
       const labels = ['Referência', 'Motivo', 'Nº Série', 'Fatura', 'Password', 'Avaria', 'Acessórios'];
 
-      // Adicionar título do item
+      //  Título do produto
       page.drawText(`(${idx + 1}) Produto`, {
         x: 50,
         y: yPos,
@@ -236,7 +233,7 @@ async function generatePDF(Data, ProductsContent) {
       });
       yPos -= 18;
 
-      // Adicionar campos em coluna
+      //  Campos em coluna com indentação nas quebras de linha
       for (let i = 0; i < fields.length && i < labels.length; i++) {
         const label = labels[i];
         const value = fields[i];
@@ -244,9 +241,9 @@ async function generatePDF(Data, ProductsContent) {
         const wrapped = wrapText(value, fontRegular, 10, 450);
 
         wrapped.forEach((line, lineIdx) => {
-          const text = lineIdx === 0 ? `${label}: ${line}` : `       ${line}`;
+          const text = lineIdx === 0 ? `${label}: ${line}` : `   ${line}`;
           page.drawText(text, {
-            x: 50,
+            x: 55, // margem leve para a esquerda
             y: yPos,
             size: 10,
             font: fontRegular,
@@ -258,10 +255,10 @@ async function generatePDF(Data, ProductsContent) {
         yPos -= 4;
       }
 
-      yPos -= 10; // Espaço extra entre produtos
+      yPos -= 10; // Espaço entre produtos
     });
 
-    // ✅ Detalhes adicionais (se necessário)
+    //  Outras informações
     if (Data && Array.isArray(Data)) {
       page.drawText("Outros Detalhes:", {
         x: 50,
@@ -288,7 +285,7 @@ async function generatePDF(Data, ProductsContent) {
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
 
-    // ✅ Função para quebra de texto automática
+    //  Função de quebra com indentação
     function wrapText(text, font, fontSize, maxWidth) {
       const words = text.split(' ');
       const lines = [];
@@ -315,9 +312,7 @@ async function generatePDF(Data, ProductsContent) {
 }
 
 
-
-
-// ✅ Start Server
+ 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
