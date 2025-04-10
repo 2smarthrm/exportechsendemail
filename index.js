@@ -156,20 +156,18 @@
 
 
 // ✅ Função para gerar o PDF
-async function generatePDF(Data, ProductsContent) {
+ async function generatePDF(Data, ProductsContent) {
   try {
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]); // A4 em pontos
+    const page = pdfDoc.addPage([595, 842]); // A4
 
-    // Carregar fontes padrão
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-    // Azul em RGB (hex: #0074FF)
     const blueColor = rgb(0, 0.454, 1);
 
-    // ✅ Adicionar "EXPORTECH" em azul e uppercase
+    // ✅ Título EXPORTECH
     page.drawText("EXPORTECH", {
       x: 50,
       y: 800,
@@ -178,7 +176,7 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    // ✅ Adicionar slogan abaixo, menor e também azul
+    // ✅ Slogan
     page.drawText("YOUR SECURITY PARTNER", {
       x: 50,
       y: 780,
@@ -187,7 +185,7 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    // ✅ Adicionar título
+    // ✅ Título do formulário
     page.drawText("Formulário de Devolução", {
       x: 50,
       y: 750,
@@ -196,51 +194,63 @@ async function generatePDF(Data, ProductsContent) {
       color: rgb(0, 0, 0),
     });
 
-    // ✅ Conteúdo dos produtos com espaçamento entre linhas
+    // 🧠 Função para desenhar texto com quebra de linha
+    const drawWrappedText = (text, x, yStart, font, size, maxWidth, lineHeight) => {
+      const words = text.split(' ');
+      let line = '';
+      let y = yStart;
+
+      words.forEach((word, index) => {
+        const testLine = line + word + ' ';
+        const testWidth = font.widthOfTextAtSize(testLine, size);
+        if (testWidth > maxWidth && index > 0) {
+          page.drawText(line.trim(), { x, y, size, font, color: rgb(0, 0, 0) });
+          line = word + ' ';
+          y -= lineHeight;
+        } else {
+          line = testLine;
+        }
+      });
+
+      if (line.trim()) {
+        page.drawText(line.trim(), { x, y, size, font, color: rgb(0, 0, 0) });
+        y -= lineHeight;
+      }
+
+      return y;
+    };
+
+    // ✅ Produtos com quebra de linha
     let yPos = 720;
-    const lineHeight = 18;
+    const contentFontSize = 12;
+    const contentLineHeight = 18;
+    const maxWidth = 500;
 
     if (ProductsContent) {
-      const lines = ProductsContent.split("\n");
-
+      const lines = ProductsContent.split('\n');
       lines.forEach((line) => {
-        if (yPos < 50) return;
-        page.drawText(line, {
-          x: 50,
-          y: yPos,
-          size: 12,
-          font: fontRegular,
-          color: rgb(0, 0, 0),
-        });
-        yPos -= lineHeight;
+        if (yPos < 60) return;
+        yPos = drawWrappedText(line, 50, yPos, fontRegular, contentFontSize, maxWidth, contentLineHeight);
       });
     }
 
-    // ✅ Adicionar detalhes da variável Data
+    // ✅ Detalhes (Data) com fonte menor e quebra também
     if (Data && Array.isArray(Data)) {
       page.drawText("Detalhes:", {
         x: 50,
         y: yPos - 10,
-        size: 12,
+        size: 11,
         font: fontBold,
         color: rgb(0, 0, 0),
       });
       yPos -= 30;
 
       Data.forEach((item) => {
-        if (yPos < 50) return;
-        page.drawText(`- ${item}`, {
-          x: 60,
-          y: yPos,
-          size: 11,
-          font: fontRegular,
-          color: rgb(0.2, 0.2, 0.2),
-        });
-        yPos -= lineHeight;
+        if (yPos < 60) return;
+        yPos = drawWrappedText(`- ${item}`, 60, yPos, fontRegular, 10, maxWidth, 15);
       });
     }
 
-    // ✅ Salvar PDF
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
   } catch (error) {
@@ -248,7 +258,6 @@ async function generatePDF(Data, ProductsContent) {
     throw error;
   }
 }
-
   
   // ✅ Start Server
   const PORT = 5000;
