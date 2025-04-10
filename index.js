@@ -189,12 +189,12 @@ async function generatePDF(Data, ProductsContent) {
 
     //  Título FORMULÁRIO RMA com estilo igual ao do produto (cor azul)
     yPos -= 40;
-    page.drawText("FORMULÁRIO RMA", {
+    page.drawText("FORMULÁRIO DE DEVOLUÇÃO DE EQUIPAMENTOS (RMA)", {
       x: 50,
       y: yPos,
-      size: 18,
+      size: 14,
       font: fontBold,
-      color: blueColor,
+      color: blackColor,
     });
 
     yPos -= 20;
