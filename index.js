@@ -155,8 +155,8 @@
 
 
 
-// ✅ Função para gerar o PDF
- async function generatePDF(Data, ProductsContent) {
+// ✅ Função para gerar o PDF 
+async function generatePDF(Data, ProductsContent) {
   try {
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([595, 842]); // A4
@@ -167,7 +167,7 @@
 
     const blueColor = rgb(0, 0.454, 1);
 
-    // ✅ Título EXPORTECH
+    // Título EXPORTECH
     page.drawText("EXPORTECH", {
       x: 50,
       y: 800,
@@ -176,7 +176,7 @@
       color: blueColor,
     });
 
-    // ✅ Slogan
+    // Slogan
     page.drawText("YOUR SECURITY PARTNER", {
       x: 50,
       y: 780,
@@ -185,7 +185,7 @@
       color: blueColor,
     });
 
-    // ✅ Título do formulário
+    // Título do formulário
     page.drawText("Formulário de Devolução", {
       x: 50,
       y: 750,
@@ -194,7 +194,7 @@
       color: rgb(0, 0, 0),
     });
 
-    // 🧠 Função para desenhar texto com quebra de linha
+    // Função com quebra de linha automática
     const drawWrappedText = (text, x, yStart, font, size, maxWidth, lineHeight) => {
       const words = text.split(' ');
       let line = '';
@@ -220,11 +220,11 @@
       return y;
     };
 
-    // ✅ Produtos com quebra de linha
+    // Produtos com fonte menor e espaçamento reduzido
     let yPos = 720;
-    const contentFontSize = 12;
-    const contentLineHeight = 18;
-    const maxWidth = 500;
+    const contentFontSize = 10;
+    const contentLineHeight = 14;
+    const maxWidth = 480;
 
     if (ProductsContent) {
       const lines = ProductsContent.split('\n');
@@ -234,20 +234,20 @@
       });
     }
 
-    // ✅ Detalhes (Data) com fonte menor e quebra também
+    // Detalhes com fonte menor ainda
     if (Data && Array.isArray(Data)) {
       page.drawText("Detalhes:", {
         x: 50,
         y: yPos - 10,
-        size: 11,
+        size: 10,
         font: fontBold,
         color: rgb(0, 0, 0),
       });
-      yPos -= 30;
+      yPos -= 26;
 
       Data.forEach((item) => {
         if (yPos < 60) return;
-        yPos = drawWrappedText(`- ${item}`, 60, yPos, fontRegular, 10, maxWidth, 15);
+        yPos = drawWrappedText(`- ${item}`, 60, yPos, fontRegular, 9, maxWidth, 13);
       });
     }
 
@@ -258,6 +258,7 @@
     throw error;
   }
 }
+
   
   // ✅ Start Server
   const PORT = 5000;
