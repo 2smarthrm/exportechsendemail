@@ -153,13 +153,12 @@ app.post("/sendfile", async (req, res) => {
 
 
 
-// ✅ Função para gerar o PDF  
+// ✅ Função para gerar o PDF   
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+
 async function generatePDF(Data, ProductsContent) {
   try {
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]);
-
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
@@ -167,9 +166,19 @@ async function generatePDF(Data, ProductsContent) {
     const blueColor = rgb(0, 0.454, 1);
     const blackColor = rgb(0, 0, 0);
 
-    let yPos = 800;
+    let page = pdfDoc.addPage([595, 842]); // A4 em pontos
+    let yPos = 800; // Posição inicial (no topo da página)
+    const lineHeight = 14;
 
-    //  Logo
+    // Função para verificar e criar nova página se necessário
+    function checkAndCreateNewPage() {
+      if (yPos < 100) {
+        page = pdfDoc.addPage([595, 842]);
+        yPos = 800; // Reiniciar a posição para o topo da nova página
+      }
+    }
+
+    // ✅ Logo
     page.drawText("EXPORTECH", {
       x: 50,
       y: yPos,
@@ -187,14 +196,14 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    //  Título FORMULÁRIO RMA com estilo igual ao do produto (cor azul)
+    // ✅ Título FORMULÁRIO RMA
     yPos -= 40;
     page.drawText("FORMULÁRIO DE DEVOLUÇÃO DE EQUIPAMENTOS (RMA)", {
       x: 50,
       y: yPos,
-      size: 12,
+      size: 11,
       font: fontBold,
-      color: blackColor,
+      color: blueColor,
     });
 
     yPos -= 20;
@@ -206,13 +215,14 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor,
     });
 
-    //  Separar os produtos
+    // ✅ Separar os produtos
     const entries = ProductsContent.split(/\(\d+\)\s*-\s*Referência:/).filter(Boolean);
 
     yPos -= 30;
-    const lineHeight = 14;
 
     entries.forEach((entry, idx) => {
+      checkAndCreateNewPage(); // Verificar se precisa de nova página
+
       if (yPos < 100) return;
 
       const fields = entry
@@ -223,7 +233,7 @@ async function generatePDF(Data, ProductsContent) {
 
       const labels = ['Referência', 'Motivo', 'Nº Série', 'Fatura', 'Password', 'Avaria', 'Acessórios'];
 
-      //  Título do produto
+      // ✅ Título do produto
       page.drawText(`(${idx + 1}) Produto`, {
         x: 50,
         y: yPos,
@@ -233,7 +243,7 @@ async function generatePDF(Data, ProductsContent) {
       });
       yPos -= 18;
 
-      //  Campos em coluna com indentação nas quebras de linha
+      // ✅ Campos em coluna com indentação nas quebras de linha
       for (let i = 0; i < fields.length && i < labels.length; i++) {
         const label = labels[i];
         const value = fields[i];
@@ -258,8 +268,10 @@ async function generatePDF(Data, ProductsContent) {
       yPos -= 10; // Espaço entre produtos
     });
 
-    //  Outras informações
+    // ✅ Outras informações
     if (Data && Array.isArray(Data)) {
+      checkAndCreateNewPage(); // Verificar se precisa de nova página
+
       page.drawText("Outros Detalhes:", {
         x: 50,
         y: yPos,
@@ -270,6 +282,8 @@ async function generatePDF(Data, ProductsContent) {
       yPos -= 18;
 
       Data.forEach((item) => {
+        checkAndCreateNewPage(); // Verificar se precisa de nova página
+
         if (yPos < 50) return;
         page.drawText(`- ${item}`, {
           x: 60,
@@ -285,7 +299,7 @@ async function generatePDF(Data, ProductsContent) {
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
 
-    //  Função de quebra com indentação
+    // ✅ Função de quebra com indentação
     function wrapText(text, font, fontSize, maxWidth) {
       const words = text.split(' ');
       const lines = [];
@@ -310,6 +324,7 @@ async function generatePDF(Data, ProductsContent) {
     throw error;
   }
 }
+
 
 
  
