@@ -206,19 +206,21 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor,
     });
 
+    yPos -= 30; // Espaço após o título "FORMULÁRIO RMA"
+
     // ✅ Detalhes da Empresa (antes dos produtos)
     if (Data && Data.company) {
       checkAndCreateNewPage(); // Verificar se precisa de nova página
 
       page.drawText("Detalhes da Empresa:", {
         x: 50,
-        y: yPos - 20,
+        y: yPos,
         size: 11,
         font: fontBold,
         color: blackColor,
       });
 
-      yPos -= 38;
+      yPos -= 18;
 
       // Exibindo os dados da empresa
       const companyData = [
@@ -248,8 +250,8 @@ async function generatePDF(Data, ProductsContent) {
     page.drawText("Detalhes dos Produtos", {
       x: 50,
       y: yPos,
-      size: 12,
-      font: fontItalic,
+      size: 11,
+      font: fontBold,
       color: blackColor,
     });
 
@@ -310,15 +312,25 @@ async function generatePDF(Data, ProductsContent) {
     checkAndCreateNewPage(); // Verificar se precisa de nova página
     yPos -= 20;
 
-    page.drawText("Loja online: www.store.exportech.com.pt", {
+    // ✅ Loja online com "Loja online" em negrito e cor preta, link azul
+    page.drawText("Loja online:", {
       x: 50,
       y: yPos,
       size: 9,
-      font: fontRegular,
-      color: blueColor,
+      font: fontBold,
+      color: blackColor, // Cor preta para "Loja online"
     });
 
     yPos -= 12;
+    page.drawText("www.store.exportech.com.pt", {
+      x: 120,
+      y: yPos,
+      size: 9,
+      font: fontRegular,
+      color: blueColor, // Cor azul para o link
+    });
+
+    yPos -= 20;
     page.drawText("Localizações:", {
       x: 50,
       y: yPos,
@@ -328,30 +340,57 @@ async function generatePDF(Data, ProductsContent) {
     });
 
     yPos -= 12;
-    page.drawText("Sede Lisboa: Rua Fernando Farinha nº 2A e 2B, Braço de Prata 1950-448 Lisboa | Tel: +351 210 353 555", {
+    page.drawText("Sede Lisboa:", {
       x: 50,
       y: yPos,
       size: 9,
-      font: fontRegular,
-      color: blackColor,
+      font: fontBold,
+      color: blackColor, // Negrito para "Sede Lisboa:"
     });
 
     yPos -= 12;
-    page.drawText("Filial Funchal: Rua da Capela do Amparo, Edifício Alpha Living Loja A, 9000-267 Funchal | Tel: +351 291 601 603", {
+    page.drawText("Rua Fernando Farinha nº 2A e 2B, Braço de Prata 1950-448 Lisboa | Tel: +351 210 353 555", {
       x: 50,
       y: yPos,
       size: 9,
       font: fontRegular,
-      color: blackColor,
+      color: blackColor, // Localização normal
     });
 
     yPos -= 12;
-    page.drawText("Armazém Logístico: Estrada do Contador nº 25 - Fracção B, Sesmaria do Colaço 2130-223 Benavente | Tel: +351 210 353 555", {
+    page.drawText("Filial Funchal:", {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontBold,
+      color: blackColor, // Negrito para "Filial Funchal:"
+    });
+
+    yPos -= 12;
+    page.drawText("Rua da Capela do Amparo, Edifício Alpha Living Loja A, 9000-267 Funchal | Tel: +351 291 601 603", {
       x: 50,
       y: yPos,
       size: 9,
       font: fontRegular,
-      color: blackColor,
+      color: blackColor, // Localização normal
+    });
+
+    yPos -= 12;
+    page.drawText("Armazém Logístico:", {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontBold,
+      color: blackColor, // Negrito para "Armazém Logístico:"
+    });
+
+    yPos -= 12;
+    page.drawText("Estrada do Contador nº 25 - Fracção B, Sesmaria do Colaço 2130-223 Benavente | Tel: +351 210 353 555", {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontRegular,
+      color: blackColor, // Localização normal
     });
 
     const pdfBytes = await pdfDoc.save();
@@ -387,10 +426,7 @@ async function generatePDF(Data, ProductsContent) {
 
 
 
- 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
-
-
