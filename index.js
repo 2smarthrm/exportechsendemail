@@ -159,83 +159,118 @@ const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 async function generatePDF(Data, ProductsContent) {
   try {
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]); // A4
+    const page = pdfDoc.addPage([595, 842]);
 
-    // Fontes
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-    const blueColor = rgb(0, 0.454, 1); // #0074FF
+    const blueColor = rgb(0, 0.454, 1);
+    const blackColor = rgb(0, 0, 0);
 
-    // ✅ Título EXPORTECH
+    let yPos = 800;
+
+    // ✅ Logo EXPORTECH
     page.drawText("EXPORTECH", {
       x: 50,
-      y: 800,
+      y: yPos,
       size: 26,
       font: fontBold,
       color: blueColor,
     });
 
     // ✅ Slogan
+    yPos -= 20;
     page.drawText("YOUR SECURITY PARTNER", {
       x: 50,
-      y: 780,
+      y: yPos,
       size: 10,
       font: fontItalic,
       color: blueColor,
     });
 
-    let yPos = 750;
-    const contentFontSize = 10;
-    const contentLineHeight = 15;
-    const maxWidth = 495; // margem de segurança
+    // ✅ Título principal
+    yPos -= 40;
+    page.drawText("FORMULÁRIO RMA", {
+      x: 50,
+      y: yPos,
+      size: 18,
+      font: fontBold,
+      color: blackColor,
+    });
 
-    // ✅ Função para desenhar texto com quebra de linha
-    function drawWrappedText(text, x, y, font, fontSize, maxWidth, lineHeight) {
-      const words = text.split(' ');
-      let line = '';
-      for (let i = 0; i < words.length; i++) {
-        const testLine = line + words[i] + ' ';
-        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
-        if (testWidth > maxWidth && line !== '') {
-          page.drawText(line.trim(), { x, y, size: fontSize, font, color: rgb(0, 0, 0) });
-          y -= lineHeight;
-          line = words[i] + ' ';
-        } else {
-          line = testLine;
-        }
-      }
-      if (line) {
-        page.drawText(line.trim(), { x, y, size: fontSize, font, color: rgb(0, 0, 0) });
-        y -= lineHeight;
-      }
-      return y;
-    }
+    // ✅ Subtítulo
+    yPos -= 20;
+    page.drawText("Detalhes dos Produtos", {
+      x: 50,
+      y: yPos,
+      size: 12,
+      font: fontItalic,
+      color: blackColor,
+    });
 
-    // ✅ Exibir os dados dos produtos com quebra e parágrafo por referência
-    if (ProductsContent) {
-      const entries = ProductsContent.split(/\(\d+\)\s*-\s*Referência:/).filter(Boolean);
-      entries.forEach((entry, idx) => {
-        const header = `( ${idx + 1} ) - Referência: `;
-        const fullText = header + entry.replace(/\n/g, ' ').trim();
+    // ✅ Separar os produtos
+    const entries = ProductsContent.split(/\(\d+\)\s*-\s*Referência:/).filter(Boolean);
 
-        if (yPos < 80) return; // prevenir overflow
-        yPos -= 10; // espaço entre blocos
-        yPos = drawWrappedText(fullText, 50, yPos, fontRegular, contentFontSize, maxWidth, contentLineHeight);
+    yPos -= 30;
+    const lineHeight = 14;
+
+    entries.forEach((entry, idx) => {
+      if (yPos < 100) return; // Evitar ultrapassar a página
+
+      const fields = entry
+        .replace(/\n/g, ' ')
+        .trim()
+        .split(/Motivo:|Nº Série:|Fatura:|Password:|Avaria:|Acessórios:/)
+        .map((s) => s.trim());
+
+      const labels = ['Referência', 'Motivo', 'Nº Série', 'Fatura', 'Password', 'Avaria', 'Acessórios'];
+
+      // Adicionar título do item
+      page.drawText(`(${idx + 1}) Produto`, {
+        x: 50,
+        y: yPos,
+        size: 12,
+        font: fontBold,
+        color: blueColor,
       });
-    }
+      yPos -= 18;
 
-    // ✅ Dados adicionais (se enviados)
+      // Adicionar campos em coluna
+      for (let i = 0; i < fields.length && i < labels.length; i++) {
+        const label = labels[i];
+        const value = fields[i];
+
+        const wrapped = wrapText(value, fontRegular, 10, 450);
+
+        wrapped.forEach((line, lineIdx) => {
+          const text = lineIdx === 0 ? `${label}: ${line}` : `       ${line}`;
+          page.drawText(text, {
+            x: 50,
+            y: yPos,
+            size: 10,
+            font: fontRegular,
+            color: blackColor,
+          });
+          yPos -= lineHeight;
+        });
+
+        yPos -= 4;
+      }
+
+      yPos -= 10; // Espaço extra entre produtos
+    });
+
+    // ✅ Detalhes adicionais (se necessário)
     if (Data && Array.isArray(Data)) {
-      page.drawText("Detalhes:", {
+      page.drawText("Outros Detalhes:", {
         x: 50,
         y: yPos,
         size: 11,
         font: fontBold,
-        color: rgb(0, 0, 0),
+        color: blackColor,
       });
-      yPos -= 20;
+      yPos -= 18;
 
       Data.forEach((item) => {
         if (yPos < 50) return;
@@ -246,13 +281,33 @@ async function generatePDF(Data, ProductsContent) {
           font: fontRegular,
           color: rgb(0.2, 0.2, 0.2),
         });
-        yPos -= 15;
+        yPos -= lineHeight;
       });
     }
 
-    // ✅ Gerar PDF
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
+
+    // ✅ Função para quebra de texto automática
+    function wrapText(text, font, fontSize, maxWidth) {
+      const words = text.split(' ');
+      const lines = [];
+      let line = '';
+
+      words.forEach((word) => {
+        const testLine = line + word + ' ';
+        const width = font.widthOfTextAtSize(testLine, fontSize);
+        if (width > maxWidth && line !== '') {
+          lines.push(line.trim());
+          line = word + ' ';
+        } else {
+          line = testLine;
+        }
+      });
+
+      if (line) lines.push(line.trim());
+      return lines;
+    }
   } catch (error) {
     console.error("Erro ao gerar o PDF:", error);
     throw error;
@@ -267,6 +322,5 @@ const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
-
 
 
