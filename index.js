@@ -154,6 +154,7 @@ app.post("/sendfile", async (req, res) => {
 
 
 // ✅ Função para gerar o PDF   
+
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 async function generatePDF(Data, ProductsContent) {
@@ -203,7 +204,7 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 11,
       font: fontBold,
-      color: blueColor,
+      color: blackColor,
     });
 
     yPos -= 20;
@@ -326,11 +327,7 @@ async function generatePDF(Data, ProductsContent) {
 }
 
 
-
- 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
-
-
