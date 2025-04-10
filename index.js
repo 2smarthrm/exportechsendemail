@@ -152,61 +152,103 @@
       res.status(500).json("Erro ao processar a solicitação.");
     }
   });
-  
-  // ✅ Função para gerar o PDF
-  async function generatePDF(Data, ProductsContent) {
-    try {
-      const pdfDoc = await PDFDocument.create();
-  
-   
-      // Criar a primeira página do PDF
-      const page = pdfDoc.addPage([595, 842]); // A4 em pontos
-  
-      // Adicionar o logotipo "EXPORTECH" (simulando um texto, caso tenha um logotipo como imagem, adicione com embedImage)
-      const logoText = "EXPORTECH";
-      page.drawText(logoText, {
-        x: 50,
-        y: 800,
-        size: 30, 
-        color: rgb(0, 0, 1), // Azul
-        letterSpacing: 1,
+
+
+
+// ✅ Função para gerar o PDF
+async function generatePDF(Data, ProductsContent) {
+  try {
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595, 842]); // A4 em pontos
+
+    // Carregar fontes padrão
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+    // Azul em RGB (hex: #0074FF)
+    const blueColor = rgb(0, 0.454, 1);
+
+    // ✅ Adicionar "EXPORTECH" em azul e uppercase
+    page.drawText("EXPORTECH", {
+      x: 50,
+      y: 800,
+      size: 26,
+      font: fontBold,
+      color: blueColor,
+    });
+
+    // ✅ Adicionar slogan abaixo, menor e também azul
+    page.drawText("YOUR SECURITY PARTNER", {
+      x: 50,
+      y: 780,
+      size: 10,
+      font: fontItalic,
+      color: blueColor,
+    });
+
+    // ✅ Adicionar título
+    page.drawText("Formulário de Devolução", {
+      x: 50,
+      y: 750,
+      size: 14,
+      font: fontBold,
+      color: rgb(0, 0, 0),
+    });
+
+    // ✅ Conteúdo dos produtos com espaçamento entre linhas
+    let yPos = 720;
+    const lineHeight = 18;
+
+    if (ProductsContent) {
+      const lines = ProductsContent.split("\n");
+
+      lines.forEach((line) => {
+        if (yPos < 50) return;
+        page.drawText(line, {
+          x: 50,
+          y: yPos,
+          size: 12,
+          font: fontRegular,
+          color: rgb(0, 0, 0),
+        });
+        yPos -= lineHeight;
       });
-  
-      // Adicionar um cabeçalho azul
-      page.drawRectangle({
-        x: 0,
-        y: 800,
-        width: 595,
-        height: 30,
-        color: rgb(0, 0, 1), // Azul
-      });
-  
-      // Adicionar título ou outros textos no cabeçalho, se necessário
-      page.drawText("Formulário de Devolução", {
-        x: 50,
-        y: 770,
-        size: 20, 
-        color: rgb(1, 1, 1), // Branco
-      });
-  
-      // Adicionar os detalhes dos produtos
-      page.drawText(ProductsContent, {
-        x: 50,
-        y: 700,
-        size: 12, 
-        color: rgb(0, 0, 0), // Preto
-        lineHeight: 15,
-      });
-  
-      // Salvar o PDF em um buffer de bytes
-      const pdfBytes = await pdfDoc.save();
-  
-      return pdfBytes;
-    } catch (error) {
-      console.error('Erro ao gerar o PDF:', error);
-      throw error;
     }
+
+    // ✅ Adicionar detalhes da variável Data
+    if (Data && Array.isArray(Data)) {
+      page.drawText("Detalhes:", {
+        x: 50,
+        y: yPos - 10,
+        size: 12,
+        font: fontBold,
+        color: rgb(0, 0, 0),
+      });
+      yPos -= 30;
+
+      Data.forEach((item) => {
+        if (yPos < 50) return;
+        page.drawText(`- ${item}`, {
+          x: 60,
+          y: yPos,
+          size: 11,
+          font: fontRegular,
+          color: rgb(0.2, 0.2, 0.2),
+        });
+        yPos -= lineHeight;
+      });
+    }
+
+    // ✅ Salvar PDF
+    const pdfBytes = await pdfDoc.save();
+    return pdfBytes;
+  } catch (error) {
+    console.error("Erro ao gerar o PDF:", error);
+    throw error;
   }
+}
+
   
   // ✅ Start Server
   const PORT = 5000;
