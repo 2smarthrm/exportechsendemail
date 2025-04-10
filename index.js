@@ -192,7 +192,7 @@ async function generatePDF(Data, ProductsContent) {
     page.drawText("FORMULÁRIO DE DEVOLUÇÃO DE EQUIPAMENTOS (RMA)", {
       x: 50,
       y: yPos,
-      size: 14,
+      size: 12,
       font: fontBold,
       color: blackColor,
     });
