@@ -155,7 +155,7 @@ app.post("/sendfile", async (req, res) => {
 
 // ✅ Função para gerar o PDF   
 
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib'); 
 
 async function generatePDF(Data, ProductsContent) {
   try {
@@ -171,15 +171,16 @@ async function generatePDF(Data, ProductsContent) {
     let yPos = 800; // Posição inicial (no topo da página)
     const lineHeight = 14;
 
-    // Função para verificar e criar nova página se necessário
-    function checkAndCreateNewPage() {
-      if (yPos < 100) {
+    // Função para verificar se há espaço suficiente para o próximo texto
+    function checkSpaceAndCreateNewPage(requiredSpace) {
+      if (yPos - requiredSpace < 50) {
         page = pdfDoc.addPage([595, 842]);
         yPos = 800; // Reiniciar a posição para o topo da nova página
       }
     }
 
     // ✅ Logo
+    checkSpaceAndCreateNewPage(40); // Verifica se há espaço para o logo
     page.drawText("EXPORTECH", {
       x: 50,
       y: yPos,
@@ -198,6 +199,7 @@ async function generatePDF(Data, ProductsContent) {
     });
 
     // ✅ Título FORMULÁRIO RMA
+    checkSpaceAndCreateNewPage(60); // Verifica se há espaço para o título
     yPos -= 40;
     page.drawText("FORMULÁRIO DE DEVOLUÇÃO DE EQUIPAMENTOS (RMA)", {
       x: 50,
@@ -222,9 +224,7 @@ async function generatePDF(Data, ProductsContent) {
     yPos -= 30;
 
     entries.forEach((entry, idx) => {
-      checkAndCreateNewPage(); // Verificar se precisa de nova página
-
-      if (yPos < 100) return;
+      checkSpaceAndCreateNewPage(40); // Verifica se há espaço antes de adicionar um novo produto
 
       const fields = entry
         .replace(/\n/g, ' ')
@@ -253,6 +253,7 @@ async function generatePDF(Data, ProductsContent) {
 
         wrapped.forEach((line, lineIdx) => {
           const text = lineIdx === 0 ? `${label}: ${line}` : `   ${line}`;
+          checkSpaceAndCreateNewPage(lineHeight * 2); // Verifica se há espaço antes de desenhar cada linha
           page.drawText(text, {
             x: 55, // margem leve para a esquerda
             y: yPos,
@@ -271,8 +272,7 @@ async function generatePDF(Data, ProductsContent) {
 
     // ✅ Outras informações
     if (Data && Array.isArray(Data)) {
-      checkAndCreateNewPage(); // Verificar se precisa de nova página
-
+      checkSpaceAndCreateNewPage(40); // Verifica se há espaço para a seção "Outros Detalhes"
       page.drawText("Outros Detalhes:", {
         x: 50,
         y: yPos,
@@ -283,9 +283,7 @@ async function generatePDF(Data, ProductsContent) {
       yPos -= 18;
 
       Data.forEach((item) => {
-        checkAndCreateNewPage(); // Verificar se precisa de nova página
-
-        if (yPos < 50) return;
+        checkSpaceAndCreateNewPage(18); // Verifica se há espaço para cada item
         page.drawText(`- ${item}`, {
           x: 60,
           y: yPos,
@@ -327,7 +325,12 @@ async function generatePDF(Data, ProductsContent) {
 }
 
 
+
+
+ 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
+
