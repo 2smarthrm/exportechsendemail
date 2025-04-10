@@ -153,9 +153,10 @@ app.post("/sendfile", async (req, res) => {
 
 
 
-// ✅ Função para gerar o PDF   
+//  Função para gerar o PDF   
 
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib'); 
+ 
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 async function generatePDF(Data, ProductsContent) {
   try {
@@ -163,8 +164,9 @@ async function generatePDF(Data, ProductsContent) {
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+    const fontSmall = await pdfDoc.embedFont(StandardFonts.Helvetica, { subset: true });
 
-    const blueColor = rgb(0, 0.454, 1);
+    const blueColor = rgb(0, 0.454, 1);  // Cor azul para o link
     const blackColor = rgb(0, 0, 0);
 
     let page = pdfDoc.addPage([595, 842]); // A4 em pontos
@@ -295,6 +297,61 @@ async function generatePDF(Data, ProductsContent) {
       });
     }
 
+    // ✅ Rodapé com informações
+    const footerText = `Website: www.exportech.com.pt.  
+Loja online : www.store.exportech.com.pt
+
+Localizações
+
+Sede Lisboa: Rua Fernando Farinha nº 2A e 2B, Braço de Prata 1950-448 Lisboa | Tel: +351 210 353 555
+Filial Funchal: Rua da Capela do Amparo, Edifício Alpha Living Loja A, 9000-267 Funchal | Tel: +351 291 601 603
+Armazém Logístico: Estrada do Contador nº 25 - Fracção B, Sesmaria do Colaço 2130-223 Benavente | Tel: +351 210 353 555`;
+
+    checkSpaceAndCreateNewPage(80); // Verifica se há espaço para o rodapé
+    // Link azul
+    page.drawText('Website: www.exportech.com.pt', {
+      x: 50,
+      y: 40,
+      size: 9,
+      font: fontSmall,
+      color: blueColor,
+    });
+    yPos -= lineHeight;
+    page.drawText('Loja online : www.store.exportech.com.pt', {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontSmall,
+      color: blueColor,
+    });
+    yPos -= lineHeight;
+
+    // Localizações com negrito para os nomes das localizações
+    const locationText = [
+      { label: 'Sede Lisboa', text: 'Rua Fernando Farinha nº 2A e 2B, Braço de Prata 1950-448 Lisboa | Tel: +351 210 353 555' },
+      { label: 'Filial Funchal', text: 'Rua da Capela do Amparo, Edifício Alpha Living Loja A, 9000-267 Funchal | Tel: +351 291 601 603' },
+      { label: 'Armazém Logístico', text: 'Estrada do Contador nº 25 - Fracção B, Sesmaria do Colaço 2130-223 Benavente | Tel: +351 210 353 555' },
+    ];
+
+    locationText.forEach((loc) => {
+      page.drawText(`${loc.label}:`, {
+        x: 50,
+        y: yPos,
+        size: 9,
+        font: fontBold,
+        color: blackColor,
+      });
+      yPos -= 12;
+      page.drawText(loc.text, {
+        x: 50,
+        y: yPos,
+        size: 9,
+        font: fontRegular,
+        color: blackColor,
+      });
+      yPos -= 18;
+    });
+
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
 
@@ -323,7 +380,6 @@ async function generatePDF(Data, ProductsContent) {
     throw error;
   }
 }
-
 
 
 
