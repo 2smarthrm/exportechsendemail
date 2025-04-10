@@ -321,8 +321,7 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor, // Cor preta para "Loja online"
     });
 
-    yPos -= 12;
-    page.drawText("www.store.exportech.com.pt", {
+    page.drawText(" www.store.exportech.com.pt", {
       x: 120,
       y: yPos,
       size: 9,
@@ -424,8 +423,7 @@ async function generatePDF(Data, ProductsContent) {
 }
 
 
-
-
+ 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
