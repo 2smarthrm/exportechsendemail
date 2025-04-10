@@ -155,11 +155,11 @@
 
 
 
-// ✅ Função para gerar o PDF 
+// ✅ Função para gerar o PDF  
 async function generatePDF(Data, ProductsContent) {
   try {
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]); // A4
+    const page = pdfDoc.addPage([595, 842]);
 
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -167,7 +167,7 @@ async function generatePDF(Data, ProductsContent) {
 
     const blueColor = rgb(0, 0.454, 1);
 
-    // Título EXPORTECH
+    // Cabeçalho
     page.drawText("EXPORTECH", {
       x: 50,
       y: 800,
@@ -176,7 +176,6 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    // Slogan
     page.drawText("YOUR SECURITY PARTNER", {
       x: 50,
       y: 780,
@@ -185,7 +184,6 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    // Título do formulário
     page.drawText("Formulário de Devolução", {
       x: 50,
       y: 750,
@@ -194,7 +192,6 @@ async function generatePDF(Data, ProductsContent) {
       color: rgb(0, 0, 0),
     });
 
-    // Função com quebra de linha automática
     const drawWrappedText = (text, x, yStart, font, size, maxWidth, lineHeight) => {
       const words = text.split(' ');
       let line = '';
@@ -220,21 +217,27 @@ async function generatePDF(Data, ProductsContent) {
       return y;
     };
 
-    // Produtos com fonte menor e espaçamento reduzido
+    // 🔵 Produtos formatados em blocos por referência
     let yPos = 720;
     const contentFontSize = 10;
     const contentLineHeight = 14;
     const maxWidth = 480;
 
     if (ProductsContent) {
-      const lines = ProductsContent.split('\n');
-      lines.forEach((line) => {
-        if (yPos < 60) return;
-        yPos = drawWrappedText(line, 50, yPos, fontRegular, contentFontSize, maxWidth, contentLineHeight);
+      // Divide por referência (começando com "(1) -", "(2) -", etc.)
+      const entries = ProductsContent.split(/\(\d+\)\s*-\s*Referência:/).filter(e => e.trim() !== '');
+      entries.forEach((entry, idx) => {
+        const header = `( ${idx + 1} ) - Referência:`;
+        const fullText = header + entry.trim();
+
+        if (yPos < 80) return; // margem de segurança no final da página
+
+        yPos -= 10; // espaço extra entre blocos
+        yPos = drawWrappedText(fullText, 50, yPos, fontRegular, contentFontSize, maxWidth, contentLineHeight);
       });
     }
 
-    // Detalhes com fonte menor ainda
+    // 🔵 Dados extras
     if (Data && Array.isArray(Data)) {
       page.drawText("Detalhes:", {
         x: 50,
@@ -258,6 +261,7 @@ async function generatePDF(Data, ProductsContent) {
     throw error;
   }
 }
+
 
   
   // ✅ Start Server
