@@ -154,8 +154,6 @@ app.post("/sendfile", async (req, res) => {
 
 
 //  Função para gerar o PDF   
-
- 
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
 async function generatePDF(Data, ProductsContent) {
@@ -164,25 +162,23 @@ async function generatePDF(Data, ProductsContent) {
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
-    const fontSmall = await pdfDoc.embedFont(StandardFonts.Helvetica, { subset: true });
 
-    const blueColor = rgb(0, 0.454, 1);  // Cor azul para o link
+    const blueColor = rgb(0, 0.454, 1);
     const blackColor = rgb(0, 0, 0);
 
     let page = pdfDoc.addPage([595, 842]); // A4 em pontos
     let yPos = 800; // Posição inicial (no topo da página)
     const lineHeight = 14;
 
-    // Função para verificar se há espaço suficiente para o próximo texto
-    function checkSpaceAndCreateNewPage(requiredSpace) {
-      if (yPos - requiredSpace < 50) {
+    // Função para verificar e criar nova página se necessário
+    function checkAndCreateNewPage() {
+      if (yPos < 100) {
         page = pdfDoc.addPage([595, 842]);
         yPos = 800; // Reiniciar a posição para o topo da nova página
       }
     }
 
     // ✅ Logo
-    checkSpaceAndCreateNewPage(40); // Verifica se há espaço para o logo
     page.drawText("EXPORTECH", {
       x: 50,
       y: yPos,
@@ -201,7 +197,6 @@ async function generatePDF(Data, ProductsContent) {
     });
 
     // ✅ Título FORMULÁRIO RMA
-    checkSpaceAndCreateNewPage(60); // Verifica se há espaço para o título
     yPos -= 40;
     page.drawText("FORMULÁRIO DE DEVOLUÇÃO DE EQUIPAMENTOS (RMA)", {
       x: 50,
@@ -211,6 +206,44 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor,
     });
 
+    // ✅ Detalhes da Empresa (antes dos produtos)
+    if (Data && Data.company) {
+      checkAndCreateNewPage(); // Verificar se precisa de nova página
+
+      page.drawText("Detalhes da Empresa:", {
+        x: 50,
+        y: yPos - 20,
+        size: 11,
+        font: fontBold,
+        color: blackColor,
+      });
+
+      yPos -= 38;
+
+      // Exibindo os dados da empresa
+      const companyData = [
+        { label: 'Empresa:', value: Data.company },
+        { label: 'E-mail:', value: Data.email },
+        { label: 'NIF:', value: Data.nif },
+        { label: 'Telefone:', value: Data.phone },
+      ];
+
+      companyData.forEach((item) => {
+        checkAndCreateNewPage(); // Verificar se precisa de nova página
+
+        page.drawText(`${item.label} ${item.value}`, {
+          x: 50,
+          y: yPos,
+          size: 10,
+          font: fontRegular,
+          color: blackColor,
+        });
+
+        yPos -= lineHeight;
+      });
+    }
+
+    // ✅ Título "Detalhes dos Produtos"
     yPos -= 20;
     page.drawText("Detalhes dos Produtos", {
       x: 50,
@@ -226,7 +259,9 @@ async function generatePDF(Data, ProductsContent) {
     yPos -= 30;
 
     entries.forEach((entry, idx) => {
-      checkSpaceAndCreateNewPage(40); // Verifica se há espaço antes de adicionar um novo produto
+      checkAndCreateNewPage(); // Verificar se precisa de nova página
+
+      if (yPos < 100) return;
 
       const fields = entry
         .replace(/\n/g, ' ')
@@ -255,7 +290,6 @@ async function generatePDF(Data, ProductsContent) {
 
         wrapped.forEach((line, lineIdx) => {
           const text = lineIdx === 0 ? `${label}: ${line}` : `   ${line}`;
-          checkSpaceAndCreateNewPage(lineHeight * 2); // Verifica se há espaço antes de desenhar cada linha
           page.drawText(text, {
             x: 55, // margem leve para a esquerda
             y: yPos,
@@ -272,84 +306,52 @@ async function generatePDF(Data, ProductsContent) {
       yPos -= 10; // Espaço entre produtos
     });
 
-    // ✅ Outras informações
-    if (Data && Array.isArray(Data)) {
-      checkSpaceAndCreateNewPage(40); // Verifica se há espaço para a seção "Outros Detalhes"
-      page.drawText("Outros Detalhes:", {
-        x: 50,
-        y: yPos,
-        size: 11,
-        font: fontBold,
-        color: blackColor,
-      });
-      yPos -= 18;
+    // ✅ Rodapé
+    checkAndCreateNewPage(); // Verificar se precisa de nova página
+    yPos -= 20;
 
-      Data.forEach((item) => {
-        checkSpaceAndCreateNewPage(18); // Verifica se há espaço para cada item
-        page.drawText(`- ${item}`, {
-          x: 60,
-          y: yPos,
-          size: 10,
-          font: fontRegular,
-          color: rgb(0.2, 0.2, 0.2),
-        });
-        yPos -= lineHeight;
-      });
-    }
-
-    // ✅ Rodapé com informações
-    const footerText = `Website: www.exportech.com.pt.  
-Loja online : www.store.exportech.com.pt
-
-Localizações
-
-Sede Lisboa: Rua Fernando Farinha nº 2A e 2B, Braço de Prata 1950-448 Lisboa | Tel: +351 210 353 555
-Filial Funchal: Rua da Capela do Amparo, Edifício Alpha Living Loja A, 9000-267 Funchal | Tel: +351 291 601 603
-Armazém Logístico: Estrada do Contador nº 25 - Fracção B, Sesmaria do Colaço 2130-223 Benavente | Tel: +351 210 353 555`;
-
-    checkSpaceAndCreateNewPage(80); // Verifica se há espaço para o rodapé
-    // Link azul
-    page.drawText('Website: www.exportech.com.pt', {
-      x: 50,
-      y: 40,
-      size: 9,
-      font: fontSmall,
-      color: blueColor,
-    });
-    yPos -= lineHeight;
-    page.drawText('Loja online : www.store.exportech.com.pt', {
+    page.drawText("Loja online: www.store.exportech.com.pt", {
       x: 50,
       y: yPos,
       size: 9,
-      font: fontSmall,
+      font: fontRegular,
       color: blueColor,
     });
-    yPos -= lineHeight;
 
-    // Localizações com negrito para os nomes das localizações
-    const locationText = [
-      { label: 'Sede Lisboa', text: 'Rua Fernando Farinha nº 2A e 2B, Braço de Prata 1950-448 Lisboa | Tel: +351 210 353 555' },
-      { label: 'Filial Funchal', text: 'Rua da Capela do Amparo, Edifício Alpha Living Loja A, 9000-267 Funchal | Tel: +351 291 601 603' },
-      { label: 'Armazém Logístico', text: 'Estrada do Contador nº 25 - Fracção B, Sesmaria do Colaço 2130-223 Benavente | Tel: +351 210 353 555' },
-    ];
+    yPos -= 12;
+    page.drawText("Localizações:", {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontBold,
+      color: blackColor,
+    });
 
-    locationText.forEach((loc) => {
-      page.drawText(`${loc.label}:`, {
-        x: 50,
-        y: yPos,
-        size: 9,
-        font: fontBold,
-        color: blackColor,
-      });
-      yPos -= 12;
-      page.drawText(loc.text, {
-        x: 50,
-        y: yPos,
-        size: 9,
-        font: fontRegular,
-        color: blackColor,
-      });
-      yPos -= 18;
+    yPos -= 12;
+    page.drawText("Sede Lisboa: Rua Fernando Farinha nº 2A e 2B, Braço de Prata 1950-448 Lisboa | Tel: +351 210 353 555", {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontRegular,
+      color: blackColor,
+    });
+
+    yPos -= 12;
+    page.drawText("Filial Funchal: Rua da Capela do Amparo, Edifício Alpha Living Loja A, 9000-267 Funchal | Tel: +351 291 601 603", {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontRegular,
+      color: blackColor,
+    });
+
+    yPos -= 12;
+    page.drawText("Armazém Logístico: Estrada do Contador nº 25 - Fracção B, Sesmaria do Colaço 2130-223 Benavente | Tel: +351 210 353 555", {
+      x: 50,
+      y: yPos,
+      size: 9,
+      font: fontRegular,
+      color: blackColor,
     });
 
     const pdfBytes = await pdfDoc.save();
@@ -375,11 +377,13 @@ Armazém Logístico: Estrada do Contador nº 25 - Fracção B, Sesmaria do Cola�
       if (line) lines.push(line.trim());
       return lines;
     }
+
   } catch (error) {
     console.error("Erro ao gerar o PDF:", error);
     throw error;
   }
 }
+
 
 
 
