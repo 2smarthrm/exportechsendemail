@@ -89,7 +89,7 @@ async function sendEmailOrder(subject, htmlContent) {
     let mailOptions = {
       from: "noreply@marketing.exportech.com.pt",
       to: "geral@exportech.com.pt",
-      bcc: ["germano.oliveira@exportech.com.pt" , "rui.guedelha@exportech.com.pt", "paulo.ferreira@exportech.com.pt"],
+      bcc: "kiosso.silva@exportech.com.pt", // ["germano.oliveira@exportech.com.pt" , "rui.guedelha@exportech.com.pt", "paulo.ferreira@exportech.com.pt"],
       subject: subject,
       html: htmlContent,
     };
