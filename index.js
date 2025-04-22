@@ -49,12 +49,12 @@ app.get("/", async (req, res) => {
 
 async function sendEmail(email, subject, htmlContent, manager) {
   let transporter = nodemailer.createTransport({
-    host: "smtp.hostinger.com", // ✅ CORRETO
-    port: 465, // Porta SMTP segura para SSL
-    secure: true, // true para SSL, false para STARTTLS
+    host: "smtp.hostinger.com", 
+    port: 465,
+    secure: true,
     auth: {
-      user: "noreply@marketing.exportech.com.pt", // Seu e-mail da Hostinger
-      pass: "!!_Exp@2024-?P4ulo#", // Sua senha ou senha de aplicativo
+      user: "noreply@marketing.exportech.com.pt", 
+      pass: "!!_Exp@2024-?P4ulo#",
     },
   });
 
@@ -72,6 +72,35 @@ async function sendEmail(email, subject, htmlContent, manager) {
   return transporter.sendMail(mailOptions);
 }
 
+
+
+async function sendEmailOrder(subject, htmlContent) {
+    let transporter = nodemailer.createTransport({
+      host: "smtp.hostinger.com", 
+      port: 465,
+      secure: true,
+      auth: {
+        user: "noreply@marketing.exportech.com.pt", 
+        pass: "!!_Exp@2024-?P4ulo#",
+      },
+    });
+   
+  
+    let mailOptions = {
+      from: "noreply@marketing.exportech.com.pt",
+      to: "geral@exportech.com.pt",
+      bcc: ["germano.oliveira@exportech.com.pt" , "rui.guedelha@exportech.com.pt", "paulo.ferreira@exportech.com.pt"],
+      subject: subject,
+      html: htmlContent,
+    };
+ 
+  
+    return transporter.sendMail(mailOptions);
+  }
+
+
+
+
 app.post("/sendfileconfig", async (req, res) => {
   try {
     const { email, htmlContent, manager } = req.body;
@@ -80,21 +109,39 @@ app.post("/sendfileconfig", async (req, res) => {
       return res.status(400).json({ error: "Missing email or HTML content!" });
     }
 
-    console.log("📩 Sending email to:", email);
+    console.log(" Sending email to:", email);
 
     const emailSubject = `Configuração Exportech - Detalhes do Projeto`;
     await sendEmail(email, emailSubject, htmlContent, manager);
 
-    console.log("📨 Email sent successfully to:", email);
+    console.log("Email sent successfully to:", email);
 
     return res.status(200).json({
-      message: "✅ Email sent successfully!",
+      message: " Email sent successfully!",
     });
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error(" Error:", error);
     return res.status(500).json({ error: "Error sending email!" });
   }
 });
+
+
+
+app.post("/sendcustomorder", async (req, res) => {
+    try {
+      const { htmlContent } = req.body;
+      const emailSubject = `Produtos customizados Exportech - Detalhes do Projeto`;
+      await sendEmailOrder(emailSubject, htmlContent);
+   
+      return res.status(200).json({
+        message: " Email sent successfully!",
+      });
+    } catch (error) {
+      console.error(" Error:", error);
+      return res.status(500).json({ error: "Error sending email!" });
+    }
+  });
+
 
 app.post("/sendfile", async (req, res) => {
   try {
@@ -119,12 +166,12 @@ app.post("/sendfile", async (req, res) => {
     const pdfBytes = await generatePDF(Data, ProductsContent);
 
     let transporter = nodemailer.createTransport({
-      host: "smtp.hostinger.com", // ✅ CORRETO
-      port: 465, // Porta SMTP segura para SSL
-      secure: true, // true para SSL, false para STARTTLS
+      host: "smtp.hostinger.com", 
+      port: 465, 
+      secure: true, 
       auth: {
-        user: "noreply@marketing.exportech.com.pt", // Seu e-mail da Hostinger
-        pass: "!!_Exp@2024-?P4ulo#", // Sua senha ou senha de aplicativo
+        user: "noreply@marketing.exportech.com.pt", 
+        pass: "!!_Exp@2024-?P4ulo#", 
       },
     });
 
@@ -178,7 +225,7 @@ async function generatePDF(Data, ProductsContent) {
       }
     }
 
-    // ✅ Logo
+    // Logo
     page.drawText("EXPORTECH", {
       x: 50,
       y: yPos,
@@ -196,7 +243,6 @@ async function generatePDF(Data, ProductsContent) {
       color: blueColor,
     });
 
-    // ✅ Título FORMULÁRIO RMA
     yPos -= 40;
     page.drawText("FORMULÁRIO DE DEVOLUÇÃO DE EQUIPAMENTOS (RMA)", {
       x: 50,
@@ -208,7 +254,7 @@ async function generatePDF(Data, ProductsContent) {
 
     yPos -= 30; // Espaço após o título "FORMULÁRIO RMA"
 
-    // ✅ Detalhes da Empresa (antes dos produtos)
+
     if (Data && Data.company) {
       checkAndCreateNewPage(); // Verificar se precisa de nova página
 
@@ -245,7 +291,7 @@ async function generatePDF(Data, ProductsContent) {
       });
     }
 
-    // ✅ Título "Detalhes dos Produtos"
+    //  Título "Detalhes dos Produtos"
     yPos -= 20;
     page.drawText("Detalhes dos Produtos", {
       x: 50,
@@ -255,7 +301,7 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor,
     });
 
-    // ✅ Separar os produtos
+    //  Separar os produtos
     const entries = ProductsContent.split(/\(\d+\)\s*-\s*Referência:/).filter(Boolean);
 
     yPos -= 30;
@@ -273,7 +319,7 @@ async function generatePDF(Data, ProductsContent) {
 
       const labels = ['Referência', 'Motivo', 'Nº Série', 'Fatura', 'Password', 'Avaria', 'Acessórios'];
 
-      // ✅ Título do produto
+      //  Título do produto
       page.drawText(`(${idx + 1}) Produto`, {
         x: 50,
         y: yPos,
@@ -283,7 +329,7 @@ async function generatePDF(Data, ProductsContent) {
       });
       yPos -= 18;
 
-      // ✅ Campos em coluna com indentação nas quebras de linha
+      //  Campos em coluna com indentação nas quebras de linha
       for (let i = 0; i < fields.length && i < labels.length; i++) {
         const label = labels[i];
         const value = fields[i];
@@ -308,11 +354,11 @@ async function generatePDF(Data, ProductsContent) {
       yPos -= 10; // Espaço entre produtos
     });
 
-    // ✅ Rodapé
+    //  Rodapé
     checkAndCreateNewPage(); // Verificar se precisa de nova página
     yPos -= 20;
 
-    // ✅ Loja online com "Loja online" em negrito e cor preta, link azul
+    //  Loja online com "Loja online" em negrito e cor preta, link azul
     page.drawText("Loja online:", {
       x: 50,
       y: yPos,
@@ -395,7 +441,7 @@ async function generatePDF(Data, ProductsContent) {
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
 
-    // ✅ Função de quebra com indentação
+    // Função de quebra com indentação
     function wrapText(text, font, fontSize, maxWidth) {
       const words = text.split(' ');
       const lines = [];
