@@ -203,6 +203,12 @@ app.post("/sendfile", async (req, res) => {
 //  Função para gerar o PDF   
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 
+
+
+
+
+
+
 async function generatePDF(Data, ProductsContent) {
   try {
     const pdfDoc = await PDFDocument.create();
@@ -212,20 +218,19 @@ async function generatePDF(Data, ProductsContent) {
 
     const blueColor = rgb(0, 0.454, 1);
     const blackColor = rgb(0, 0, 0);
+    const redColor = rgb(1, 0, 0); // cor vermelha
 
-    let page = pdfDoc.addPage([595, 842]); // A4 em pontos
-    let yPos = 800; // Posição inicial (no topo da página)
+    let page = pdfDoc.addPage([595, 842]);
+    let yPos = 800;
     const lineHeight = 14;
 
-    // Função para verificar e criar nova página se necessário
     function checkAndCreateNewPage() {
       if (yPos < 100) {
         page = pdfDoc.addPage([595, 842]);
-        yPos = 800; // Reiniciar a posição para o topo da nova página
+        yPos = 800;
       }
     }
 
-    // Logo
     page.drawText("EXPORTECH", {
       x: 50,
       y: yPos,
@@ -252,11 +257,10 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor,
     });
 
-    yPos -= 30; // Espaço após o título "FORMULÁRIO RMA"
-
+    yPos -= 30;
 
     if (Data && Data.company) {
-      checkAndCreateNewPage(); // Verificar se precisa de nova página
+      checkAndCreateNewPage();
 
       page.drawText("Detalhes da Empresa:", {
         x: 50,
@@ -268,7 +272,6 @@ async function generatePDF(Data, ProductsContent) {
 
       yPos -= 18;
 
-      // Exibindo os dados da empresa
       const companyData = [
         { label: 'Empresa:', value: Data.company },
         { label: 'E-mail:', value: Data.email },
@@ -277,8 +280,7 @@ async function generatePDF(Data, ProductsContent) {
       ];
 
       companyData.forEach((item) => {
-        checkAndCreateNewPage(); // Verificar se precisa de nova página
-
+        checkAndCreateNewPage();
         page.drawText(`${item.label} ${item.value}`, {
           x: 50,
           y: yPos,
@@ -286,12 +288,10 @@ async function generatePDF(Data, ProductsContent) {
           font: fontRegular,
           color: blackColor,
         });
-
         yPos -= lineHeight;
       });
     }
 
-    //  Título "Detalhes dos Produtos"
     yPos -= 20;
     page.drawText("Detalhes dos Produtos", {
       x: 50,
@@ -301,14 +301,11 @@ async function generatePDF(Data, ProductsContent) {
       color: blackColor,
     });
 
-    //  Separar os produtos
     const entries = ProductsContent.split(/\(\d+\)\s*-\s*Referência:/).filter(Boolean);
-
     yPos -= 30;
 
     entries.forEach((entry, idx) => {
-      checkAndCreateNewPage(); // Verificar se precisa de nova página
-
+      checkAndCreateNewPage();
       if (yPos < 100) return;
 
       const fields = entry
@@ -319,7 +316,6 @@ async function generatePDF(Data, ProductsContent) {
 
       const labels = ['Referência', 'Motivo', 'Nº Série', 'Fatura', 'Password', 'Avaria', 'Acessórios'];
 
-      //  Título do produto
       page.drawText(`(${idx + 1}) Produto`, {
         x: 50,
         y: yPos,
@@ -329,17 +325,15 @@ async function generatePDF(Data, ProductsContent) {
       });
       yPos -= 18;
 
-      //  Campos em coluna com indentação nas quebras de linha
       for (let i = 0; i < fields.length && i < labels.length; i++) {
         const label = labels[i];
         const value = fields[i];
-
         const wrapped = wrapText(value, fontRegular, 10, 450);
 
         wrapped.forEach((line, lineIdx) => {
           const text = lineIdx === 0 ? `${label}: ${line}` : `   ${line}`;
           page.drawText(text, {
-            x: 55, // margem leve para a esquerda
+            x: 55,
             y: yPos,
             size: 10,
             font: fontRegular,
@@ -351,20 +345,18 @@ async function generatePDF(Data, ProductsContent) {
         yPos -= 4;
       }
 
-      yPos -= 10; // Espaço entre produtos
+      yPos -= 10;
     });
 
-    //  Rodapé
-    checkAndCreateNewPage(); // Verificar se precisa de nova página
+    checkAndCreateNewPage();
     yPos -= 20;
 
-    //  Loja online com "Loja online" em negrito e cor preta, link azul
     page.drawText("Loja online:", {
       x: 50,
       y: yPos,
       size: 9,
       font: fontBold,
-      color: blackColor, // Cor preta para "Loja online"
+      color: blackColor,
     });
 
     page.drawText(" www.store.exportech.com.pt", {
@@ -372,7 +364,7 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 9,
       font: fontRegular,
-      color: blueColor, // Cor azul para o link
+      color: blueColor,
     });
 
     yPos -= 20;
@@ -390,7 +382,7 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 9,
       font: fontBold,
-      color: blackColor, // Negrito para "Sede Lisboa:"
+      color: blackColor,
     });
 
     yPos -= 12;
@@ -399,7 +391,7 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 9,
       font: fontRegular,
-      color: blackColor, // Localização normal
+      color: blackColor,
     });
 
     yPos -= 12;
@@ -408,7 +400,7 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 9,
       font: fontBold,
-      color: blackColor, // Negrito para "Filial Funchal:"
+      color: blackColor,
     });
 
     yPos -= 12;
@@ -417,7 +409,7 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 9,
       font: fontRegular,
-      color: blackColor, // Localização normal
+      color: blackColor,
     });
 
     yPos -= 12;
@@ -426,7 +418,7 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 9,
       font: fontBold,
-      color: blackColor, // Negrito para "Armazém Logístico:"
+      color: blackColor,
     });
 
     yPos -= 12;
@@ -435,13 +427,22 @@ async function generatePDF(Data, ProductsContent) {
       y: yPos,
       size: 9,
       font: fontRegular,
-      color: blackColor, // Localização normal
+      color: blackColor,
+    });
+
+    // Frase em vermelho e negrito
+    yPos -= 20;
+    page.drawText("O RMA será enviado para o seu email, o mesmo deve de ser impresso e acompanhado com o acessório;", {
+      x: 50,
+      y: yPos,
+      size: 10,
+      font: fontBold,
+      color: redColor,
     });
 
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
 
-    // Função de quebra com indentação
     function wrapText(text, font, fontSize, maxWidth) {
       const words = text.split(' ');
       const lines = [];
@@ -467,6 +468,13 @@ async function generatePDF(Data, ProductsContent) {
     throw error;
   }
 }
+
+
+
+
+
+
+
 
 
  
