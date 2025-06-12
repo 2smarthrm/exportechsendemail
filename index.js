@@ -31,9 +31,9 @@ function Managers(managerKey) {
     return emailRegex.test(email);
   }
 
-  if (isValidEmail(mail) === false) return "fabio.catela@exportech.com.pt";
+  if (isValidEmail(mail) === false) return "kiossocamuegi@gmail.com"  // fabio.catela@exportech.com.pt;
   console.log("key = ", newKey);
-  return mail !== null ? "fabio.catela@exportech.com.pt" : mail;
+  return mail !== null ? return "kiossocamuegi@gmail.com"  : mail; /* fabio.catela@exportech.com.pt */
 }
 
 const app = express();
