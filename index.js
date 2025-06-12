@@ -33,7 +33,7 @@ function Managers(managerKey) {
 
   if (isValidEmail(mail) === false) return "kiossocamuegi@gmail.com" ;
   console.log("key = ", newKey);
-  return mail !== null ? return "kiossocamuegi@gmail.com"  : mail;  
+  return mail !== null ? "kiossocamuegi@gmail.com"  : mail;  
 }
 
 const app = express();
