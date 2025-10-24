@@ -178,7 +178,7 @@ app.post("/sendfile", async (req, res) => {
     const mailOptions = {
       from: "noreply@marketing.exportech.com.pt",
       to: [Data.email],
-      bcc: ["geral@exportech.com.pt"],
+      bcc: ["anderson.alarcon@exportech.com.pt"],
       subject: `Formulário de Devolução - ${Data.company || "Não informado"}`,
       text: `Segue em anexo o formulário de devolução da empresa ${Data.company || "Não informado"}.`,
       attachments: [{ filename: "Formulario_Devolucao.pdf", content: pdfBytes, contentType: "application/pdf" }],
