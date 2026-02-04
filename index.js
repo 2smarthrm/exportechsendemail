@@ -143,60 +143,65 @@ app.post("/sendcustomorder", async (req, res) => {
   });
 
 
+
+
+
+
+
+
+
 app.post("/sendfile", async (req, res) => {
   try {
-    if (!fetch) {
-      fetch = (await import("node-fetch")).default;
-    }
-
-    const Data = req.body.dt;
+    const Data = req.body.dt || {};
     const Products = Data.products || [];
     let ProductsContent = "";
 
     for (let i = 0; i < Products.length; i++) {
-      ProductsContent += `(${i + 1}) - Referência: ${Products[i].referenciadoequipamento}\n`
-        + `Motivo: ${Products[i].motivodadevolucao}\n`
-        + `Nº Série: ${Products[i].ndeserie}\n`
-        + `Fatura: ${Products[i].nfaturacompra}\n`
-        + `Password: ${Products[i].palavrapassedoequipamento}\n`
-        + `Avaria: ${Products[i].descricaodaavaria}\n`
-        + `Acessórios: ${Products[i].acessoriosqueacompanhamoequipamento}\n\n`;
+      ProductsContent += `(${i + 1}) - Referência: ${Products[i].referenciadoequipamento || ""}\n`
+        + `Motivo: ${Products[i].motivodadevolucao || ""}\n`
+        + `Nº Série: ${Products[i].ndeserie || ""}\n`
+        + `Fatura: ${Products[i].nfaturacompra || ""}\n`
+        + `Password: ${Products[i].palavrapassedoequipamento || ""}\n`
+        + `Avaria: ${Products[i].descricaodaavaria || ""}\n`
+        + `Acessórios: ${Products[i].acessoriosqueacompanhamoequipamento || ""}\n\n`;
     }
 
-    const pdfBytes = await generatePDF(Data, ProductsContent);
+    const pdfBytes = await generatePDF(Data, ProductsContent); // Uint8Array
 
-    let transporter = nodemailer.createTransport({
-      host: "smtp.hostinger.com", 
-      port: 465, 
-      secure: true, 
-      auth: {
-        user: "noreply@marketing.exportech.com.pt", 
-        pass: "!!_Exp@2024-?P4ulo#", 
-      },
-    });
-
+    // Envia email com o anexo
     const mailOptions = {
-      from: "noreply@marketing.exportech.com.pt",
-      to: [Data.email],
+      from: process.env.SMTP_USER,
+      to: [Data.email].filter(Boolean),
       bcc: ["anderson.alarcon@exportech.com.pt"],
       subject: `Formulário de Devolução - ${Data.company || "Não informado"}`,
       text: `Segue em anexo o formulário de devolução da empresa ${Data.company || "Não informado"}.`,
-      attachments: [{ filename: "Formulario_Devolucao.pdf", content: pdfBytes, contentType: "application/pdf" }],
+      attachments: [
+        {
+          filename: "Formulario_Devolucao.pdf",
+          content: Buffer.from(pdfBytes),
+          contentType: "application/pdf",
+        },
+      ],
     };
 
-    transporter.sendMail(mailOptions, (err, info) => {
-      if (err) {
-        console.error("Erro ao enviar e-mail:", err);
-        return res.status(500).json({ error: "Erro ao enviar o e-mail." });
-      }
-      console.log("E-mail enviado:", info.response);
-      return res.status(200).json({msg:"Mensagem enviada com sucesso !", pdf_file:pdfBytes} );
-    });
+    await transporter.sendMail(mailOptions);
+ 
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=Formulario_Devolucao.pdf");
+    return res.status(200).send(Buffer.from(pdfBytes));
+
   } catch (error) {
     console.error("Erro:", error);
-    res.status(500).json("Erro ao processar a solicitação.");
+    return res.status(500).json({ error: "Erro ao processar a solicitação." });
   }
 });
+
+ 
+
+
+
+
+
 
 
 
