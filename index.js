@@ -1,4 +1,4 @@
-const express = require("express");
+ const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 const multer = require("multer");
@@ -166,9 +166,9 @@ app.post("/sendfile", async (req, res) => {
         + `Acessórios: ${Products[i].acessoriosqueacompanhamoequipamento || ""}\n\n`;
     }
 
-    const pdfBytes = await generatePDF(Data, ProductsContent); // Uint8Array
+    const pdfBytes = await generatePDF(Data, ProductsContent);  
 
-    // Envia email com o anexo
+ 
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: [Data.email].filter(Boolean),
@@ -192,7 +192,7 @@ app.post("/sendfile", async (req, res) => {
 
   } catch (error) {
     console.error("Erro:", error);
-    return res.status(500).json({ error: "Erro ao processar a solicitação." });
+    return res.status(500).json({ error: "Erro ao processar a solicitação.", err:error });
   }
 });
 
@@ -474,14 +474,7 @@ async function generatePDF(Data, ProductsContent) {
   }
 }
 
-
-
-
-
-
-
-
-
+ 
  
 const PORT = 5000;
 app.listen(PORT, () => {
