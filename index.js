@@ -190,7 +190,7 @@ app.post("/sendfile", async (req, res) => {
         return res.status(500).json({ error: "Erro ao enviar o e-mail." });
       }
       console.log("E-mail enviado:", info.response);
-      return res.status(200).json("Mensagem enviada com sucesso!");
+      return res.status(200).json({msg:"Mensagem enviada com sucesso !", pdf_file:pdfBytes} );
     });
   } catch (error) {
     console.error("Erro:", error);
