@@ -37,7 +37,11 @@ function Managers(managerKey) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [ 
+    "https://store.exportech.com.pt", 
+   ]
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
